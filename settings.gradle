@@ -1,2 +1,5 @@
+include ':et'
 include ':app'
 rootProject.name = "AptDemo"
+include ':router-annotation'
+include ':router-compiler'
