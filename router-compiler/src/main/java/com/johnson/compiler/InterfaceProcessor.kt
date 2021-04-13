@@ -1,7 +1,8 @@
 package com.johnson.compiler
 
 import com.google.auto.service.AutoService
-import com.johnson.annotation.DoctorInterface
+import com.johnson.annotation.CompilerAnnotation
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
@@ -16,35 +17,48 @@ class InterfaceProcessor : AbstractProcessor() {
 
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
-        return Collections.singleton(DoctorInterface::class.java.canonicalName)
+        return Collections.singleton(CompilerAnnotation::class.java.canonicalName)
     }
 
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
 
     override fun process(
-            annotations: MutableSet<out TypeElement>?,
-            roundEnv: RoundEnvironment?
+        annotations: MutableSet<out TypeElement>?,
+        roundEnv: RoundEnvironment?
     ): Boolean {
-        val main = MethodSpec.methodBuilder("main")
-            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+        val init = MethodSpec.methodBuilder("init")
+            .addModifiers(Modifier.PUBLIC)
             .returns(Void.TYPE)
-            .addParameter(Array<String>::class.java, "args")
-            .addStatement("\$T.out.println(\$S)", System::class.java, "Hello, JavaPoet!")
             .build()
 
-
-        val helloWord = TypeSpec.classBuilder("HelloWorld")
-            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-            .addMethod(main)
+        val destroy = MethodSpec.methodBuilder("destroy")
+            .addModifiers(Modifier.PUBLIC)
+            .returns(Void.TYPE)
             .build()
 
-        try {
-            val javaFile = JavaFile.builder("com.johnson.apt", helloWord)
-                .addFileComment("This codes are generated automatically. Do not modify!")
+        val elementsAnnotatedWith =
+            roundEnv?.getElementsAnnotatedWith(CompilerAnnotation::class.java) ?: return false
+
+        elementsAnnotatedWith.forEach { element ->
+            val typeElement = element as TypeElement
+            val interfaceName = ClassName.get(typeElement)
+            val packageName = interfaceName.packageName()
+
+            val build = TypeSpec.classBuilder(element.simpleName.toString() + "Impl")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addMethods(arrayListOf(init, destroy))
+                .superclass(interfaceName)
                 .build()
-            javaFile.writeTo(processingEnv.filer)
-        } catch (e: Exception) {
-            return false
+
+
+            try {
+                val javaFile = JavaFile.builder(packageName, build)
+                    .addFileComment(" This codes are generated automatically. Do not modify!")
+                    .build()
+                javaFile.writeTo(processingEnv.filer)
+            } catch (e: Exception) {
+                return false
+            }
         }
         return true
     }

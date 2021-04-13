@@ -4,5 +4,5 @@ import com.johnson.annotation.CompilerAnnotation;
 
 
 @CompilerAnnotation
-public class Test {
+public class Test3 {
 }
