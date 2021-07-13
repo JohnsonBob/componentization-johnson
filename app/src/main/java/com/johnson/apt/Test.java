@@ -1,8 +1,8 @@
 package com.johnson.apt;
 
-import com.johnson.annotation.CompilerAnnotation;
+import com.johnson.annotation.ProvideMethod;
 
 
-@CompilerAnnotation
 public class Test {
+
 }

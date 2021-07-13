@@ -1,7 +1,7 @@
 package com.johnson.compiler
 
 import com.google.auto.service.AutoService
-import com.johnson.annotation.CompilerAnnotation
+import com.johnson.annotation.ProvideMethod
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
@@ -17,7 +17,7 @@ class InterfaceProcessor : AbstractProcessor() {
 
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
-        return Collections.singleton(CompilerAnnotation::class.java.canonicalName)
+        return Collections.singleton(ProvideMethod::class.java.canonicalName)
     }
 
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
@@ -37,7 +37,7 @@ class InterfaceProcessor : AbstractProcessor() {
             .build()
 
         val elementsAnnotatedWith =
-            roundEnv?.getElementsAnnotatedWith(CompilerAnnotation::class.java) ?: return false
+            roundEnv?.getElementsAnnotatedWith(ProvideMethod::class.java) ?: return false
 
         elementsAnnotatedWith.forEach { element ->
             val typeElement = element as TypeElement

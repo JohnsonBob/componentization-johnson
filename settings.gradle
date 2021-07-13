@@ -1,3 +1,5 @@
+include ':test-moduleB'
+include ':test-moduleA'
 include ':router-center'
 rootProject.name = "AptDemo"
 include ':app'
