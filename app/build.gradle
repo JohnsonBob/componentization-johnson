@@ -46,4 +46,7 @@ dependencies {
 
     implementation project(":router-annotation")
     kapt project(':router-compiler')
+
+    implementation project(":test-moduleA")
+    implementation project(":test-moduleB")
 }

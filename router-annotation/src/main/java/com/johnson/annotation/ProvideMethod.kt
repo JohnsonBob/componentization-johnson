@@ -2,5 +2,5 @@ package com.johnson.annotation
 
 
 @Retention(AnnotationRetention.SOURCE)
-@Target(AnnotationTarget.ANNOTATION_CLASS,  AnnotationTarget.CLASS)
+@Target(AnnotationTarget.FUNCTION)
 annotation class ProvideMethod
