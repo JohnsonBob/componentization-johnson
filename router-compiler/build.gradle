@@ -13,7 +13,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_STDLIB_VERSION"
 
-    implementation 'com.squareup:javapoet:1.12.1' //javapoet代码生成框架
+    implementation 'com.squareup:kotlinpoet:1.9.0' //kotlinpoet代码生成框架
     implementation project(':router-annotation') //依赖注解模块
     implementation 'com.google.auto.service:auto-service:1.0-rc7' //自动注册注解处理器
     kapt 'com.google.auto.service:auto-service:1.0-rc7' //自动注册注解处理器

@@ -8,7 +8,7 @@ import com.johnson.annotation.ProvideMethod
  * @CreateDate: 2021/7/14 20:49
  * @Description:
  */
-class ProjectAProvide {
+open class ProjectAProvide {
     @ProvideMethod
     fun getAInt() = 15
 

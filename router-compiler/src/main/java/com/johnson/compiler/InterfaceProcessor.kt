@@ -2,14 +2,12 @@ package com.johnson.compiler
 
 import com.google.auto.service.AutoService
 import com.johnson.annotation.ProvideMethod
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.JavaFile
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeSpec
+import com.johnson.compiler.bean.ProvideMethodBean
+import com.johnson.compiler.utils.MethodProvideParser
 import java.util.*
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
-import javax.lang.model.element.Modifier
+import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 
 @AutoService(Processor::class)
@@ -24,42 +22,35 @@ class InterfaceProcessor : AbstractProcessor() {
 
     override fun process(
         annotations: MutableSet<out TypeElement>?,
-        roundEnv: RoundEnvironment?
+        roundEnv: RoundEnvironment?,
     ): Boolean {
-        val init = MethodSpec.methodBuilder("init")
-            .addModifiers(Modifier.PUBLIC)
-            .returns(Void.TYPE)
-            .build()
+        if (roundEnv == null) return false
 
-        val destroy = MethodSpec.methodBuilder("destroy")
-            .addModifiers(Modifier.PUBLIC)
-            .returns(Void.TYPE)
-            .build()
+        generateMethodProvide(roundEnv)
+        generaModuleProxy(roundEnv)
+        return true
+    }
 
-        val elementsAnnotatedWith =
-            roundEnv?.getElementsAnnotatedWith(ProvideMethod::class.java) ?: return false
+    private fun generateMethodProvide(roundEnv: RoundEnvironment) {
+        val elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(ProvideMethod::class.java)
+        var methodParser: MethodProvideParser? = null
 
         elementsAnnotatedWith.forEach { element ->
-            val typeElement = element as TypeElement
-            val interfaceName = ClassName.get(typeElement)
-            val packageName = interfaceName.packageName()
+            if (methodParser == null) {
+                val enclosingElement = element.enclosingElement as? TypeElement
+                if (enclosingElement != null)
+                    methodParser = MethodProvideParser(enclosingElement)
+            }
 
-            val build = TypeSpec.classBuilder(element.simpleName.toString() + "Impl")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addMethods(arrayListOf(init, destroy))
-                .superclass(interfaceName)
-                .build()
-
-
-            try {
-                val javaFile = JavaFile.builder(packageName, build)
-                    .addFileComment(" This codes are generated automatically. Do not modify!")
-                    .build()
-                javaFile.writeTo(processingEnv.filer)
-            } catch (e: Exception) {
-                return false
+            (element as? ExecutableElement)?.run {
+                methodParser?.addMethod(ProvideMethodBean(this))
             }
         }
-        return true
+
+        methodParser?.generateFile(processingEnv.filer)
+    }
+
+    private fun generaModuleProxy(roundEnv: RoundEnvironment) {
+
     }
 }
