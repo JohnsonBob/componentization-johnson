@@ -13,5 +13,5 @@ open class ProjectBProvide {
     fun getBInt() = 20
 
     @ProvideMethod
-    fun getBString(string: String, int: Int) = string + int
+    fun getBString(string: String?, int: Int) = string + int
 }

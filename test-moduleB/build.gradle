@@ -34,7 +34,7 @@ android {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_STDLIB_VERSION"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VERSION"
     implementation project(":router-center")
     implementation project(":router-annotation")
     kapt project(':router-compiler')
