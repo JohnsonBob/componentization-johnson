@@ -4,10 +4,10 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.asTypeName
 import javax.lang.model.type.TypeMirror
-import kotlin.jvm.internal.ClassBasedDeclarationContainer
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap;
 import kotlin.reflect.jvm.internal.impl.name.FqName;
+import javax.lang.model.element.Element
 
 /**
  * @Author: Johnson
@@ -15,7 +15,7 @@ import kotlin.reflect.jvm.internal.impl.name.FqName;
  * @Description:
  */
 object ClassTypeUtils {
-    val MethodParam = ClassName.bestGuess("com.johnson.center.bean.MethodParam")
+//    val MethodParam = ClassName.bestGuess("com.johnson.center.bean.MethodParam")
     val MethodResult = ClassName.bestGuess("com.johnson.center.bean.MethodResult")
     val IModuleProvider = ClassName.bestGuess("com.johnson.center.interfaces.IModuleProvider")
     val RouteModule = ClassName.bestGuess("com.johnson.center.interfaces.RouteModule")
@@ -59,3 +59,7 @@ val String.className: ClassName
             ClassName.bestGuess(className)
         }
     }
+
+//is can null
+val Element.isNullable: Boolean
+    get() = getAnnotation(org.jetbrains.annotations.Nullable::class.java) != null

@@ -14,4 +14,7 @@ open class ProjectBProvide {
 
     @ProvideMethod
     fun getBString(string: String?, int: Int) = string + int
+
+    @ProvideMethod
+    fun getBStringWaaaa(string: String?, int: Int, string2: String?) = string + int
 }

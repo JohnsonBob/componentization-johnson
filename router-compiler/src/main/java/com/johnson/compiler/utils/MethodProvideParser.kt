@@ -56,22 +56,35 @@ class MethodProvideParser constructor(element: TypeElement, elementUtils: Elemen
 
     private fun generateInvokeMethod(method: ProvideMethodBean): FunSpec {
         val invoke = FunSpec.builder(Constants.METHOD_INVOKE + method.methodName)
-            .returns(method.returnType.autoAsTypeName().copy(true))
+            .returns(ClassTypeUtils.MethodResult.copy(true))
+
+        val throws = AnnotationSpec.builder(Throws::class).addMember("%T::class", Exception::class.className)
+        invoke.addAnnotation(throws.build())
 
         val mutableList = ArrayList::class.className
         val mutableListOfAny = mutableList.parameterizedBy(Any::class.className)
         invoke.addParameter("params", mutableListOfAny)
+        invoke.addStatement("if(params.size > %L) return %T(400)", method.parameters.size, ClassTypeUtils.MethodResult)
+
+
         val parameters = arrayListOf<String>()
         method.parameters.forEachIndexed { index, item ->
-            invoke.addStatement("val ${Constants.METHOD_PARAM + index} = params.getOrNull($index) as? %T", item.autoAsTypeName())
-            parameters.add(Constants.METHOD_PARAM + index)
+            val name = Constants.METHOD_PARAM + index
+            parameters.add(name)
+            invoke.addStatement("val $name = params.getOrNull($index)")
+            if (item.nullable) {
+                invoke.addStatement("if($name !is %T?) return %T(400)", item.type.autoAsTypeName(), ClassTypeUtils.MethodResult)
+            } else {
+                invoke.addStatement("if($name !is %T) return %T(400)", item.type.autoAsTypeName(), ClassTypeUtils.MethodResult)
+            }
         }
 
         val invokeString = StringBuilder()
-        invokeString.append("return ${Constants.PROPERTY_MODULE_PROVIDER}?.${method.methodName}(")
+        invokeString.append("val result = ${Constants.PROPERTY_MODULE_PROVIDER}?.${method.methodName}(")
         parameters.joinTo(invokeString, ", ")
         invokeString.append(")")
         invoke.addStatement(invokeString.toString())
+        invoke.addStatement("return %T(200, result)", ClassTypeUtils.MethodResult)
         return invoke.build()
     }
 
@@ -80,7 +93,7 @@ class MethodProvideParser constructor(element: TypeElement, elementUtils: Elemen
         val mutableList = ArrayList::class.className
         register.addStatement("val result = %T<Class<*>>()", mutableList)
         method.parameters.forEach {
-            register.addStatement("result.add(%T::class.java) ", it.autoAsTypeName())
+            register.addStatement("result.add(%T::class.java) ", it.type.autoAsTypeName())
         }
         register.addStatement("${Constants.PROPERTY_METHOD_PROVIDE}?.regMethod(%S, %N)", method.methodName, "result")
         return register.build()

@@ -1,6 +1,7 @@
 package com.johnson.compiler.bean
 
 import com.johnson.annotation.ProvideMethod
+import com.johnson.compiler.utils.isNullable
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.type.TypeMirror
 
@@ -12,7 +13,7 @@ import javax.lang.model.type.TypeMirror
 class ProvideMethodBean constructor(private val element: ExecutableElement) {
     var methodName: String = ""
     var returnType: TypeMirror
-    var parameters:MutableList<TypeMirror> = mutableListOf()
+    var parameters: MutableList<Parameter> = mutableListOf()
 
     init {
         val annotation = element.getAnnotation(ProvideMethod::class.java)
@@ -24,7 +25,7 @@ class ProvideMethodBean constructor(private val element: ExecutableElement) {
         returnType = element.returnType
 
         element.parameters?.forEach {
-            parameters.add(it.asType())
+            parameters.add(Parameter(it.asType(), it.isNullable))
         }
     }
 }
